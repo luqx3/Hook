@@ -43,7 +43,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/init"
-        android:id="@+id/init"
+        android:id="@+id/reInit"
         android:layout_above="@+id/launch_circle"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"

@@ -49,15 +49,23 @@ public class MessageTable {
     }
 
 
-    public Observable<List<MsgInfo>> getAllMsg() throws Exception {
+    public Observable<List<MsgInfo>> getAllMsg(final String ... params) throws Exception {
         MsgDb = SQLiteDatabase.openDatabase(dbPath, null, 0);
         return Observable.create(new ObservableOnSubscribe<List<MsgInfo>>() {
             @Override
             public void subscribe(ObservableEmitter<List<MsgInfo>> emitter) throws Exception {
-                Cursor cursor = MsgDb.query("message",
-                        new String[]{"talkerId", "talker", "createTime", "content"},
-                        "createTime > " + Share.msgLastExportTime,
-                        new String[]{}, "", "", "createTime DESC", "");
+                Cursor cursor;
+                if(params.length>0) {
+                    cursor = MsgDb.query("message",
+                            new String[]{"talkerId", "talker", "createTime", "content"},
+                            "createTime > " + params[0],
+                            new String[]{}, "", "", "createTime DESC", "");
+                }else{
+                     cursor = MsgDb.query("message",
+                            new String[]{"talkerId", "talker", "createTime", "content"},
+                            "createTime > " + Share.msgLastExportTime,
+                            new String[]{}, "", "", "createTime DESC", "");
+                }
                 List<MsgInfo> result = new ArrayList<>();
                 boolean isFrist = true;
                 while (cursor.moveToNext()) {

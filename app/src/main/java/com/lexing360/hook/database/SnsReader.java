@@ -36,35 +36,16 @@ public class SnsReader {
 
     }
 
-    public void runSnsMicroMsg() throws Throwable {
-        Log.d("luqx", "Querying Sns database.");
-        querySnsMicroMsgDatabase();
-        Task.saveToJSONFile(this.snsList, Config.EXT_DIR + "all_sns.json", false);
-    }
-    public void runEnMicroMsg() throws Throwable {
-        Log.d("luqx", "EnMicroMsg Sns database.");
-        queryEnMicroMsgdbDatabase();
+    public void runSnsMicroMsg(String ... params) throws Throwable {
+        querySnsMicroMsgDatabase(params);
         Task.saveToJSONFile(this.snsList, Config.EXT_DIR + "all_sns.json", false);
     }
 
     public ArrayList<SnsInfo> getSnsList() {
         return this.snsList;
     }
-    protected void queryEnMicroMsgdbDatabase() throws Throwable {
-        SqlCipher.decrypt(mContext,"EnMicroMsg.db","deEnMicroMsg.db", KEY);
-        String dbPath = Config.EXT_DIR + "deEnMicroMsg.db";
-        if (!new File(dbPath).exists()) {
-            Log.e("luqx", "EnMicroMsg DB file not found");
-            throw new Exception("DB file not found");
-        }
-        SQLiteDatabase database = SQLiteDatabase.openDatabase(dbPath, null, 0);
-        Cursor cursor = database.query("message", new String[]{"content",} ,"", new String[]{},"","","createTime DESC","");
-        while (cursor.moveToNext()) {
-            Log.i("luqx",cursor.toString());
-            //addSnsInfoFromCursor(cursor);
-        }
-    }
-    protected void querySnsMicroMsgDatabase() throws Throwable {
+
+    protected void querySnsMicroMsgDatabase(String ... params) throws Throwable {
         String dbPath = Config.EXT_DIR + "SnsMicroMsg.db";
         if (!new File(dbPath).exists()) {
             Log.e("Error", "DB file not found");
@@ -73,8 +54,13 @@ public class SnsReader {
         snsList.clear();
         SQLiteDatabase database = SQLiteDatabase.openDatabase(dbPath, null, 0);
         getCurrentUserIdFromDatabase(database);
-        Cursor cursor = database.query("SnsInfo", new String[]{"SnsId", "userName", "createTime", "content", "attrBuf"} ,"createTime > "+ Share.snsLastExportTime, new String[]{},"","","createTime DESC","");
-        boolean isFrist=true;
+
+        Cursor cursor ;
+        if(params.length>0){
+            cursor= database.query("SnsInfo", new String[]{"SnsId", "userName", "createTime", "content", "attrBuf"} ,"createTime > "+ params[0], new String[]{},"","","createTime DESC","");
+        }else {
+            cursor=database.query("SnsInfo", new String[]{"SnsId", "userName", "createTime", "content", "attrBuf"}, "createTime > " + Share.snsLastExportTime, new String[]{}, "", "", "createTime DESC", "");
+        }boolean isFrist=true;
         while (cursor.moveToNext()) {
             if(isFrist){
                 Share.snsLastTime=cursor.getLong(cursor.getColumnIndex("createTime"));
