@@ -2,12 +2,14 @@ package com.lexing360.hook.common;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -60,6 +62,22 @@ public class Init {
         outputStream.close();
         sleep(500);
     }
+    public static void deleteSnsAndMsgDB() throws  Exception{
+        String dataDir = Environment.getDataDirectory().getAbsolutePath();
+        String destDir = Config.EXT_DIR;
+        Process su = Runtime.getRuntime().exec("su");
+        DataOutputStream outputStream = new DataOutputStream(su.getOutputStream());
+        outputStream.writeBytes("mount -o remount,rw " + dataDir + "\n");
+
+        outputStream.writeBytes("rm " + destDir + "SnsMicroMsg.db\n");
+        outputStream.writeBytes("rm " + destDir + "EnMicroMsg.db\n");
+        outputStream.writeBytes("sleep 1000\n");
+
+        outputStream.writeBytes("exit\n");
+        outputStream.flush();
+        outputStream.close();
+        sleep(500);
+    }
     //复制数据库信息
     //数据库路径：MD5(mm+UIN）;
     public static void copySnsAndMsgDB(String folder) throws Exception {
@@ -69,22 +87,19 @@ public class Init {
         DataOutputStream outputStream = new DataOutputStream(su.getOutputStream());
         outputStream.writeBytes("mount -o remount,rw " + dataDir + "\n");
 
-        outputStream.writeBytes("rm " + destDir + "SnsMicroMsg.db\n");
-        outputStream.writeBytes("rm " + destDir + "EnMicroMsg.db\n");
+        //outputStream.writeBytes("rm " + destDir + "SnsMicroMsg.db\n");
+        //outputStream.writeBytes("rm " + destDir + "EnMicroMsg.db\n");
 
-        outputStream.writeBytes("sleep 1\n");
-        outputStream.writeBytes("chmod 777 " + dataDir + "/data/" + Config.WECHAT_PACKAGE +"/MicroMsg/"+folder +"/EnMicroMsg.db\n");
-        outputStream.writeBytes(" cp " + dataDir + "/data/" + Config.WECHAT_PACKAGE +"/MicroMsg/"+folder +"/SnsMicroMsg.db " + destDir + "\n");
-        outputStream.writeBytes(" cp " + dataDir + "/data/" + Config.WECHAT_PACKAGE +"/MicroMsg/"+folder +"/EnMicroMsg.db "+  destDir+"\n");
+        outputStream.writeBytes(" cp " + dataDir + "/data/" + Config.WECHAT_PACKAGE +"/MicroMsg/"+folder +"/SnsMicroMsg.db  " + destDir + "\n");
+        outputStream.writeBytes(" cp " + dataDir + "/data/" + Config.WECHAT_PACKAGE +"/MicroMsg/"+folder +"/EnMicroMsg.db  "+  destDir+"\n");
 
-        outputStream.writeBytes("sleep 1\n");
+        outputStream.writeBytes("sleep 1000\n");
         outputStream.writeBytes("chmod 777 " + destDir + "SnsMicroMsg.db\n");
         outputStream.writeBytes("chmod 777 " + destDir + "EnMicroMsg.db\n");
 
         outputStream.writeBytes("exit\n");
         outputStream.flush();
         outputStream.close();
-        sleep(1000);
     }
 
     //获取微信UIN
@@ -149,14 +164,26 @@ public class Init {
             if(ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE)== PackageManager.PERMISSION_GRANTED){
                 Share.IMEI = ((TelephonyManager)  context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
                 Share.KEY= WeixinMD5.n((Share.IMEI + Share.UIN).getBytes()).substring(0,7);
+                Log.i("luqx","秘钥：   "+Share.IMEI+"  "+Share.UIN+"   "+Share.KEY);
             }else {
                 throw new Exception("No permission");
             }
         }
+        //deleteSnsAndMsgDB();
         copySnsAndMsgDB(Share.FOLDER);
         //获取上次获取的数据的时间。
         SharedPreferences settings = context.getSharedPreferences(settingFile, Activity.MODE_PRIVATE);
         Share.snsLastExportTime = Share.snsLastTime=settings.getLong("snsLastExportTime",0);
         Share.msgLastExportTime = Share.msgLastTime=settings.getLong("msgLastExportTime",0);
+        exists=false;
+        while (!exists){
+            File enFile=new File(Config.EXT_DIR + "EnMicroMsg.db");
+            File snsFile=new File(Config.EXT_DIR + "SnsMicroMsg.db");
+            if(enFile.exists() && snsFile.exists()){
+                exists=true;
+            }
+            sleep(100);
+        }
+        //sleep(1000);
     }
 }

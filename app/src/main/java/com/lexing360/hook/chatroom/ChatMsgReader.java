@@ -11,7 +11,9 @@ import com.lexing360.hook.http.MsgDTO;
 import com.lexing360.hook.http.UploadRetrofit;
 import com.lexing360.hook.http.WechatTextSingle;
 
+
 import net.sqlcipher.database.SQLiteDatabase;
+import net.sqlcipher.database.SQLiteDatabaseHook;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -23,24 +25,42 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-import static com.lexing360.hook.chatroom.SqlCipher.hook;
 
 /**
  * Created by zzb on 2017/12/20.
  */
 
 public class ChatMsgReader {
+
+
     ArrayList<MsgInfo> msgList = new ArrayList<MsgInfo>();
     Context mContext;
     SQLiteDatabase chatDB;
-    String WechatTextSingleType="2";
+    String WechatTextSingleType="1";
+    static ChatMsgReader instance;
 
-    public ChatMsgReader(Context context){
+    SQLiteDatabaseHook hook = new SQLiteDatabaseHook(){
+        @Override
+        public void preKey(SQLiteDatabase database){
+        }
+        @Override
+        public void postKey(SQLiteDatabase database){
+            //最关键的一句！！！
+            //database.rawExecSQL("PRAGMA cipher_migrate")这句最为关键，原因如下：
+            //现在SQLCipher for Android已经是3.X版本了，而微信居然还停留在2.X时代，所以这句话是为了能够用3.X的开源库兼容2.X的加密解密方法，如果不加这句话，是无法对数据库进行解密的。
+            database.rawExecSQL("PRAGMA cipher_migrate;");
+        }
+    };
+
+    private ChatMsgReader(Context context){
         this.mContext=context;
+    }
+    public static ChatMsgReader getInstance(Context context){
+        if(instance==null){
+            instance=new ChatMsgReader(context);
+        }
+        return instance;
     }
 
     public List<WechatTextSingle> uploadEnMicroMsgDB(final String ... params){
@@ -48,7 +68,8 @@ public class ChatMsgReader {
         List<WechatTextSingle> list=new ArrayList<>();
 
         File databaseFile = mContext.getDatabasePath( Config.EXT_DIR + "EnMicroMsg.db");
-        chatDB = net.sqlcipher.database.SQLiteDatabase.openOrCreateDatabase(databaseFile, Share.KEY, null,hook);
+        Log.i("luqx","KEY: "+Share.KEY);
+        chatDB = SQLiteDatabase.openOrCreateDatabase(databaseFile, Share.KEY, null , hook);
         cursor = chatDB.query("message",
                 new String[]{"talkerId", "talker", "createTime", "content"},
                 "createTime > " + (params.length>0 ? params[0]:Share.msgLastExportTime),
