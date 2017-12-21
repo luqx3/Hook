@@ -39,4 +39,17 @@ public class WechatTextSingle {
         }
         return msgJSON.toString();
     }
+
+    public void setImportCreateTime(String importCreateTime){
+        this.importCreateTime=importCreateTime;
+    }
+    public String getImportCreateTime(){
+        return this.importCreateTime;
+    }
+    public void setText(String text){
+        this.text=text;
+    }
+    public String getText(){
+        return text;
+    }
 }

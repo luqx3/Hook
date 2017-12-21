@@ -15,4 +15,12 @@ public class MsgDTO {
     public MsgDTO(List<WechatTextSingle> list){
         this.list=list;
     }
+
+    public void setList(List<WechatTextSingle> list ){
+        this.list=list;
+    }
+
+    public List<WechatTextSingle> getList() {
+        return list;
+    }
 }

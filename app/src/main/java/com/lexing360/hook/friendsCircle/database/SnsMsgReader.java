@@ -7,7 +7,6 @@ import android.util.Log;
 
 import com.lexing360.hook.common.Config;
 import com.lexing360.hook.common.Share;
-import com.lexing360.hook.friendsCircle.model.SnsInfo;
 import com.lexing360.hook.http.WechatTextSingle;
 
 import java.io.File;
