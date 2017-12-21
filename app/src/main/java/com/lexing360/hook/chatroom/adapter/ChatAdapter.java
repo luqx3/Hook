@@ -1,4 +1,4 @@
-package com.lexing360.hook.message.adapter;
+package com.lexing360.hook.chatroom.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -11,9 +11,8 @@ import android.widget.TextView;
 
 
 import com.lexing360.hook.R;
-import com.lexing360.hook.message.model.MsgInfo;
+import com.lexing360.hook.chatroom.model.MsgInfo;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -21,9 +20,9 @@ import java.util.List;
  * Created by zzb on 2017/12/15.
  */
 
-public class MsgAdapter extends ArrayAdapter<MsgInfo> {
+public class ChatAdapter extends ArrayAdapter<MsgInfo> {
     List<MsgInfo> msgInfosList;
-    public  MsgAdapter(Context context, int resource, List<MsgInfo> msgInfosList){
+    public ChatAdapter(Context context, int resource, List<MsgInfo> msgInfosList){
             super(context, resource, msgInfosList);
             this.msgInfosList = msgInfosList;
     }
@@ -55,7 +54,7 @@ public class MsgAdapter extends ArrayAdapter<MsgInfo> {
             viewHolder = (ViewHolder)view.getTag();
         }
 
-        viewHolder.selectedCheckBox.setText(msgInfo.talker);
+        viewHolder.selectedCheckBox.setText(msgInfo.nickname);
         viewHolder.selectedCheckBox.setChecked(msgInfo.selected);
         viewHolder.snsContentTextView.setText(msgInfo.content);
         viewHolder.snsTimeTextView.setText(msgInfo.createTime);

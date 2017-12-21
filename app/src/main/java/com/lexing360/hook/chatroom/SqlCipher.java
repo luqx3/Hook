@@ -1,4 +1,4 @@
-package com.lexing360.hook.database;
+package com.lexing360.hook.chatroom;
 
 import android.content.Context;
 
@@ -25,6 +25,8 @@ public class SqlCipher {
             //database.rawExecSQL("PRAGMA cipher_migrate")这句最为关键，原因如下：
             //现在SQLCipher for Android已经是3.X版本了，而微信居然还停留在2.X时代，所以这句话是为了能够用3.X的开源库兼容2.X的加密解密方法，如果不加这句话，是无法对数据库进行解密的。
             database.rawExecSQL("PRAGMA cipher_migrate;");
+            //PRAGMA cipher_use_hmac = off;
+            //PRAGMA kdf_iter = 4000;
         }
     };
 

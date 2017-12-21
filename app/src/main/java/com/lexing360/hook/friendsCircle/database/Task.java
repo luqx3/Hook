@@ -1,18 +1,14 @@
-package com.lexing360.hook.database;
+package com.lexing360.hook.friendsCircle.database;
 
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.Environment;
 import android.util.Log;
-import android.widget.Toast;
 
 
-import com.lexing360.hook.R;
 import com.lexing360.hook.common.Config;
-import com.lexing360.hook.common.Share;
 import com.lexing360.hook.friendsCircle.model.SnsInfo;
 
 import org.json.JSONArray;
@@ -89,22 +85,24 @@ public class Task {
     public void copyAPKFromAssets() {
         InputStream assetInputStream = null;
         File outputAPKFile = new File(Config.EXT_DIR + "wechat.apk");
-        if (outputAPKFile.exists())
-            outputAPKFile.delete();
-        byte[] buf = new byte[1024];
-        try {
-            outputAPKFile.createNewFile();
-            assetInputStream = context.getAssets().open("wechat.apk");
-            FileOutputStream outAPKStream = new FileOutputStream(outputAPKFile);
-            int read;
-            while((read = assetInputStream.read(buf)) != -1) {
-                outAPKStream.write(buf, 0, read);
+        if (!outputAPKFile.exists()){
+            byte[] buf = new byte[1024];
+            try {
+                outputAPKFile.createNewFile();
+                assetInputStream = context.getAssets().open("wechat.apk");
+                FileOutputStream outAPKStream = new FileOutputStream(outputAPKFile);
+                int read;
+                while((read = assetInputStream.read(buf)) != -1) {
+                    outAPKStream.write(buf, 0, read);
+                }
+                assetInputStream.close();
+                outAPKStream.close();
+            } catch (Exception e) {
+                Log.e("Error", "exception", e);
             }
-            assetInputStream.close();
-            outAPKStream.close();
-        } catch (Exception e) {
-            Log.e("Error", "exception", e);
         }
+           // outputAPKFile.delete();
+
     }
 
     public void initSnsReader() {

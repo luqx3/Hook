@@ -42,7 +42,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/init"
+        android:text="@string/refresh"
         android:id="@+id/reInit"
         android:layout_above="@+id/launch_circle"
         android:layout_alignParentLeft="true"
@@ -61,10 +61,18 @@
         android:id="@+id/launch_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/exportAll"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:text="@string/launch_message" />
+    <Button
+        android:id="@+id/exportAll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
-        android:text="@string/launch_message" />
+        android:text="@string/upload_all" />
 </RelativeLayout>

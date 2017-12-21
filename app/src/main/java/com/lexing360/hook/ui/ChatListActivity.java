@@ -13,18 +13,17 @@ import android.view.MenuItem;
 import android.widget.ListView;
 
 import com.lexing360.hook.R;
+import com.lexing360.hook.chatroom.ChatMsgReader;
 import com.lexing360.hook.common.Config;
 import com.lexing360.hook.common.Share;
-import com.lexing360.hook.database.Task;
-import com.lexing360.hook.message.MessageTable;
-import com.lexing360.hook.message.adapter.MsgAdapter;
+import com.lexing360.hook.chatroom.adapter.ChatAdapter;
 
 
 /**
  * Created by zzb on 2017/12/15.
  */
 
-public class MsgListActivity extends AppCompatActivity {
+public class ChatListActivity extends AppCompatActivity {
 
 
 
@@ -36,7 +35,7 @@ public class MsgListActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         ListView snsListView = (ListView)findViewById(R.id.sns_list_view);
-        MsgAdapter adapter = new MsgAdapter(this, R.layout.sns_item, Share.msgData.msgList);
+        ChatAdapter adapter = new ChatAdapter(this, R.layout.sns_item, Share.msgData.msgList);
         snsListView.setAdapter(adapter);
 
     }
@@ -68,7 +67,7 @@ public class MsgListActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
     protected void exportSelectedMsg() {
-        MessageTable.saveToJSONFile(Share.msgData.msgList, Config.EXT_DIR + "exported_msg.json", true);
+        ChatMsgReader.saveToJSONFile(Share.msgData.msgList, Config.EXT_DIR + "exported_msg.json", true);
         new AlertDialog.Builder(this)
                 .setMessage(String.format(getString(R.string.export_success), Config.EXT_DIR + "exported_msg.json"))
                 .setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {

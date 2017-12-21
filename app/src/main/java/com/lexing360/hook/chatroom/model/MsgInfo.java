@@ -1,4 +1,4 @@
-package com.lexing360.hook.message.model;
+package com.lexing360.hook.chatroom.model;
 
 import android.database.Cursor;
 
@@ -11,10 +11,10 @@ import java.util.Locale;
  */
 
 public class MsgInfo {
-    public String msgId = "";
     public String talker = "";
     public String content = "";
     public String createTime = "";
+    public String nickname="";
     public long talkerId = 0;
     public long timestamp = 0;
 

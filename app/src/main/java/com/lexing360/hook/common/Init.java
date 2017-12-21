@@ -8,10 +8,6 @@ import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
-import android.util.Log;
-
-
-import com.lexing360.hook.database.SqlCipher;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -50,8 +46,23 @@ public class Init {
             extDir.mkdir();
         }
     }
+    public static void copySP() throws Exception{
+        String dataDir = Environment.getDataDirectory().getAbsolutePath();
+        String destDir = Config.EXT_DIR;
+        Process su = Runtime.getRuntime().exec("su");
+        DataOutputStream outputStream = new DataOutputStream(su.getOutputStream());
+        outputStream.writeBytes("mount -o remount,rw " + dataDir + "\n");
+        outputStream.writeBytes("rm " + destDir + "system_config_prefs.xml\n");
+        outputStream.writeBytes(" cp "+dataDir + "/data/" + Config.WECHAT_PACKAGE +"/shared_prefs/system_config_prefs.xml " + destDir + "\n");
+        outputStream.writeBytes("chmod 777 " + destDir + "system_config_prefs.xml\n");
+        outputStream.writeBytes("exit\n");
+        outputStream.flush();
+        outputStream.close();
+        sleep(500);
+    }
     //复制数据库信息
-    public static void copySnsAndMsgDB() throws Exception {
+    //数据库路径：MD5(mm+UIN）;
+    public static void copySnsAndMsgDB(String folder) throws Exception {
         String dataDir = Environment.getDataDirectory().getAbsolutePath();
         String destDir = Config.EXT_DIR;
         Process su = Runtime.getRuntime().exec("su");
@@ -60,19 +71,16 @@ public class Init {
 
         outputStream.writeBytes("rm " + destDir + "SnsMicroMsg.db\n");
         outputStream.writeBytes("rm " + destDir + "EnMicroMsg.db\n");
-        outputStream.writeBytes("rm " + destDir + "deEnMicroMsg.db\n");
-        outputStream.writeBytes("rm " + destDir + "system_config_prefs.xml\n");
-        outputStream.writeBytes("sleep 1\n");
 
-        outputStream.writeBytes("cd " + dataDir + "/data/" + Config.WECHAT_PACKAGE + "/MicroMsg\n");
-        outputStream.writeBytes("ls | while read line; do cp ${line}/SnsMicroMsg.db " + destDir + " ; done \n");
-        outputStream.writeBytes("ls | while read line; do cp ${line}/EnMicroMsg.db " + destDir + " ; done \n");
+        outputStream.writeBytes("sleep 1\n");
+        outputStream.writeBytes("chmod 777 " + dataDir + "/data/" + Config.WECHAT_PACKAGE +"/MicroMsg/"+folder +"/EnMicroMsg.db\n");
+        outputStream.writeBytes(" cp " + dataDir + "/data/" + Config.WECHAT_PACKAGE +"/MicroMsg/"+folder +"/SnsMicroMsg.db " + destDir + "\n");
+        outputStream.writeBytes(" cp " + dataDir + "/data/" + Config.WECHAT_PACKAGE +"/MicroMsg/"+folder +"/EnMicroMsg.db "+  destDir+"\n");
+
         outputStream.writeBytes("sleep 1\n");
         outputStream.writeBytes("chmod 777 " + destDir + "SnsMicroMsg.db\n");
         outputStream.writeBytes("chmod 777 " + destDir + "EnMicroMsg.db\n");
-        outputStream.writeBytes(" cp ../shared_prefs/system_config_prefs.xml " + destDir + "\n");
-        outputStream.writeBytes("sleep 1\n");
-        outputStream.writeBytes("chmod 777 " + destDir + "system_config_prefs.xml\n");
+
         outputStream.writeBytes("exit\n");
         outputStream.flush();
         outputStream.close();
@@ -123,35 +131,32 @@ public class Init {
     }
 
     public static void copyDB(final Context context,final boolean isFirst) throws Exception{
+        boolean exists=false;
         if(isFirst){
             makeExtDir();
             testRoot();
-        }
-        copySnsAndMsgDB();
-        boolean exists=false;
-        while (!exists&& isFirst ){
-            File file=new File(Config.EXT_DIR + "system_config_prefs.xml");
-            if(file.exists()){
-                exists=true;
-                getUIN();
+            copySP();
+            while (!exists){
+                File file=new File(Config.EXT_DIR + "system_config_prefs.xml");
+                if(file.exists()){
+                    exists=true;
+                    getUIN();
+                }
+                sleep(100);
             }
-            sleep(1000);
-        }
-        //解密数据库
-        if(ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE)== PackageManager.PERMISSION_GRANTED){
-            Share.IMEI = ((TelephonyManager)  context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
-            Share.KEY= WeixinMD5.n((Share.IMEI + Share.UIN).getBytes()).substring(0,7);
-            SqlCipher.decrypt(context,"EnMicroMsg.db","deEnMicroMsg.db", Share.KEY);
-            if (!new File( Config.EXT_DIR + "deEnMicroMsg.db").exists()) {
-                Log.e("luqx", "EnMicroMsg DB file not found");
-                throw new Exception("DB file not found");
+            Share.FOLDER=WeixinMD5.n(("mm"+ Share.UIN).getBytes());
+            //计算数据库秘钥
+            if(ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE)== PackageManager.PERMISSION_GRANTED){
+                Share.IMEI = ((TelephonyManager)  context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
+                Share.KEY= WeixinMD5.n((Share.IMEI + Share.UIN).getBytes()).substring(0,7);
+            }else {
+                throw new Exception("No permission");
             }
-        }else {
-            throw new Exception("No permission");
         }
-        //获取上次获取的数据。
+        copySnsAndMsgDB(Share.FOLDER);
+        //获取上次获取的数据的时间。
         SharedPreferences settings = context.getSharedPreferences(settingFile, Activity.MODE_PRIVATE);
-        Share.snsLastExportTime=Share.snsLastTime=settings.getLong("snsLastExportTime",0);
-        Share.msgLastExportTime=Share.msgLastTime=settings.getLong("msgLastExportTime",0);
+        Share.snsLastExportTime = Share.snsLastTime=settings.getLong("snsLastExportTime",0);
+        Share.msgLastExportTime = Share.msgLastTime=settings.getLong("msgLastExportTime",0);
     }
 }

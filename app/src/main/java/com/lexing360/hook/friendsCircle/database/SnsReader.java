@@ -1,4 +1,4 @@
-package com.lexing360.hook.database;
+package com.lexing360.hook.friendsCircle.database;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -8,22 +8,25 @@ import android.util.Log;
 import com.lexing360.hook.common.Config;
 import com.lexing360.hook.common.Share;
 import com.lexing360.hook.friendsCircle.model.SnsInfo;
+import com.lexing360.hook.http.WechatTextSingle;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
  * Created by chiontang on 2/12/16.
  */
 public class SnsReader {
-    static String KEY="0f31d31";
+    String WechatTextSingleType="0";
 
     Class SnsDetail = null;
     Class SnsDetailParser = null;
     Class SnsObject = null;
     Parser parser = null;
     ArrayList<SnsInfo> snsList = new ArrayList<SnsInfo>();
+    List<WechatTextSingle> wechatTextSingleList=new ArrayList<>();
     String currentUserId = "";
     Context mContext;
 
@@ -36,13 +39,22 @@ public class SnsReader {
 
     }
 
-    public void runSnsMicroMsg(String ... params) throws Throwable {
-        querySnsMicroMsgDatabase(params);
-        Task.saveToJSONFile(this.snsList, Config.EXT_DIR + "all_sns.json", false);
+    public void runSnsMicroMsg(String ... params)  {
+        try{
+            querySnsMicroMsgDatabase(params);
+            Task.saveToJSONFile(this.snsList, Config.EXT_DIR + "all_sns.json", false);
+        }catch (Throwable e){
+            e.printStackTrace();
+        }
+
     }
 
     public ArrayList<SnsInfo> getSnsList() {
         return this.snsList;
+    }
+
+    public List<WechatTextSingle> getWechatTextSingleList(){
+        return this.wechatTextSingleList;
     }
 
     protected void querySnsMicroMsgDatabase(String ... params) throws Throwable {
@@ -54,13 +66,11 @@ public class SnsReader {
         snsList.clear();
         SQLiteDatabase database = SQLiteDatabase.openDatabase(dbPath, null, 0);
         getCurrentUserIdFromDatabase(database);
-
         Cursor cursor ;
-        if(params.length>0){
-            cursor= database.query("SnsInfo", new String[]{"SnsId", "userName", "createTime", "content", "attrBuf"} ,"createTime > "+ params[0], new String[]{},"","","createTime DESC","");
-        }else {
-            cursor=database.query("SnsInfo", new String[]{"SnsId", "userName", "createTime", "content", "attrBuf"}, "createTime > " + Share.snsLastExportTime, new String[]{}, "", "", "createTime DESC", "");
-        }boolean isFrist=true;
+        cursor=database.query("SnsInfo", new String[]{"SnsId", "userName", "createTime", "content", "attrBuf"},
+                "createTime > " +  (params.length>0 ? params[0] :Share.snsLastExportTime ),
+                new String[]{}, "", "", "createTime DESC", "");
+        boolean isFrist=true;
         while (cursor.moveToNext()) {
             if(isFrist){
                 Share.snsLastTime=cursor.getLong(cursor.getColumnIndex("createTime"));
@@ -109,9 +119,8 @@ public class SnsReader {
         }
 
         snsList.add(newSns);
+        wechatTextSingleList.add(new WechatTextSingle(WechatTextSingleType,newSns));
         //newSns.print();
     }
-
-
 
 }

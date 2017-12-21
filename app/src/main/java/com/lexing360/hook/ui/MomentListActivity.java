@@ -16,7 +16,7 @@ import android.widget.ListView;
 import com.lexing360.hook.R;
 import com.lexing360.hook.common.Config;
 import com.lexing360.hook.common.Share;
-import com.lexing360.hook.database.Task;
+import com.lexing360.hook.friendsCircle.database.Task;
 import com.lexing360.hook.friendsCircle.adapter.SnsInfoAdapter;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;

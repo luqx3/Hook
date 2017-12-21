@@ -10,7 +10,7 @@ public class Config {
     static boolean ready = false;
 
     final static public String EXT_DIR = Environment.getExternalStorageDirectory() + "/Hook/";
-
+    final static public String DATA_DIR =Environment.getDataDirectory().getAbsolutePath();
     final static public String WECHAT_PACKAGE = "com.tencent.mm";
 
     final static public String[] VERSIONS = {"6.3.13.49_r4080b63", "6.3.13.64_r4488992"};

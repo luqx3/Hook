@@ -1,7 +1,8 @@
-package com.lexing360.hook.database;
+package com.lexing360.hook.friendsCircle.database;
 
 import com.lexing360.hook.common.Config;
 import com.lexing360.hook.friendsCircle.model.SnsInfo;
+import com.lexing360.hook.http.WechatTextSingle;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -19,10 +20,19 @@ public class Parser {
     protected Class SnsDetail = null;
     protected Class SnsObject = null;
 
+    String WechatTextSingleType="0";
+
     public Parser(Class SnsDetail, Class SnsDetailParser, Class SnsObject) {
         this.SnsDetailParser = SnsDetailParser;
         this.SnsDetail = SnsDetail;
         this.SnsObject = SnsObject;
+    }
+
+    public WechatTextSingle parseWechatTextSingleFromBin(byte[] snsDetailBin)  throws Throwable{
+        Object snsDetail = parseSnsDetailFromBin(snsDetailBin);
+        SnsInfo snsInfo = parseSnsDetail(snsDetail);
+        return new WechatTextSingle(WechatTextSingleType,snsInfo);
+
     }
 
     public SnsInfo parseSnsAllFromBin(byte[] snsDetailBin, byte[] snsObjectBin) throws Throwable {
@@ -45,6 +55,7 @@ public class Parser {
         String xmlResult = (String)snsDetailParserMethod.invoke(this, snsDetail);
         return parseTimelineXML(xmlResult);
     }
+
 
     public Object parseSnsObjectFromBin(byte[] bin) throws Throwable {
         Object snsObject = SnsObject.newInstance();

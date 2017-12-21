@@ -8,7 +8,8 @@
     <string name="supported_wechat_versions">支持的微信版本</string>
     <string name="launch_message">导出聊天消息</string>
     <string name="launch_circle">导出朋友圈信息</string>
-    <string name="init">重新导入数据库</string>
+    <string name="refresh">刷新数据</string>
+    <string name="upload_all">上传全部消息</string>
     <string name="description_0">导出你的朋友圈数据和微信消息。</string>
     <string name="description_1">请确认已允许本APP获得root权限。</string>
     <string name="description_2">点击“运行”开始分析你的微信朋友圈。这将需要几分钟时间。</string>
@@ -43,6 +44,7 @@
     <string name="user_moment_count">%d 条</string>
     <string name="export">导出</string>
     <string name="export_success">已将所选朋友圈导出到 %s</string>
+    <string name="accessibility_description">自动接收好友</string>
     <string name="description_html">
 
     </string>
